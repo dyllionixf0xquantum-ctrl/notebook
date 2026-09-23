@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DYLL BINDER - Catatan Keuangan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CATATAN & Keuangan 📔</h1>
+            <h2>DYLL BINDER</h2>
+        </header>
+
+        <section class="summary">
+            <div class="card">Saldo<br><span id="saldo">Rp 0</span></div>
+            <div class="card income">Pemasukan<br><span id="pemasukan">Rp 0</span></div>
+            <div class="card expense">Pengeluaran<br><span id="pengeluaran">Rp 0</span></div>
+        </section>
+
+        <section class="form">
+            <input type="text" id="catatan" placeholder="Pilih catatan, atau tekan “+” untuk membuat yang baru.">
+            <div class="input-group">
+                <input type="number" id="jumlah" placeholder="Jumlah">
+                <select id="tipe">
+                    <option value="masuk">Masuk</option>
+                    <option value="keluar">Keluar</option>
+                </select>
+            </div>
+            <select id="kategori">
+                <option value="Makanan">Makanan</option>
+                <option value="Transportasi">Transportasi</option>
+                <option value="Kuliah">Kuliah</option>
+                <option value="Belanja">Belanja</option>
+                <option value="Hiburan">Hiburan</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
+            <button id="btnTambah">Tambahkan</button>
+        </section>
+
+        <section class="settings">
+            <h3>Pengaturan</h3>
+            <div class="setting-item">
+                <label>Tema</label>
+                <button id="btnTema">☀ Terang / ☾ Gelap</button>
+            </div>
+            <div class="setting-item">
+                <label>Warna Aksen</label>
+                <input type="color" id="warnaAksen" value="#4CAF50">
+            </div>
+            <div class="setting-item">
+                <label>Warna Teks</label>
+                <input type="color" id="warnaTeks" value="#333333">
+            </div>
+        </section>
+
+        <section class="data-actions">
+            <h3>Data</h3>
+            <button id="btnEkspor">Ekspor</button>
+            <button id="btnImpor">Impor</button>
+            <input type="file" id="fileImpor" accept=".json" hidden>
+            <button id="btnHapus" class="danger">Hapus semua</button>
+        </section>
+
+        <section class="history">
+            <h3>Riwayat</h3>
+            <ul id="listCatatan"></ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

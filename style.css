@@ -1,0 +1,53 @@
+:root {
+    --bg: #f4f4f9;
+    --text: #333;
+    --card-bg: #fff;
+    --accent: #4CAF50;
+}
+
+[data-theme="dark"] {
+    --bg: #222;
+    --text: #eee;
+    --card-bg: #333;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container { max-width: 400px; width: 100%; }
+header { text-align: center; margin-bottom: 20px; }
+h1, h2 { margin: 0; }
+
+.summary { display: flex; gap: 10px; margin-bottom: 20px; }
+.card { flex: 1; background: var(--card-bg); padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.income span { color: #4CAF50; }
+.expense span { color: #f44336; }
+
+.form, .settings, .data-actions, .history { 
+    background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+}
+
+input, select, button { 
+    width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; 
+    border: 1px solid #ccc; box-sizing: border-box; font-size: 14px;
+}
+button { background: var(--accent); color: white; border: none; cursor: pointer; font-weight: bold; }
+button.danger { background: #f44336; }
+
+.input-group { display: flex; gap: 10px; }
+.input-group input, .input-group select { flex: 1; }
+
+.setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.setting-item input[type="color"] { width: 50px; height: 40px; padding: 0; border: none; }
+.setting-item button { width: auto; padding: 5px 10px; }
+
+ul { list-style: none; padding: 0; margin: 0; }
+li { background: var(--bg); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; }
