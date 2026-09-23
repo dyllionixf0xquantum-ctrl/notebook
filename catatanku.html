@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Catatanku — Catatan &amp; Keuangan</title>
+<style>
+  :root{
+    --accent:#3454D1;
+    --text:#23262B;
+    --bg:#FAF9F5;
+    --surface:#FFFFFF;
+    --surface-2:#F1EFE8;
+    --line:#E4E1D8;
+    --muted:#8B8578;
+    --danger:#C24B4B;
+    --income:#2F8F5B;
+    --radius:10px;
+  }
+  html[data-theme="dark"]{
+    --bg:#15171B; --surface:#1C1F24; --surface-2:#23262C; --line:#2C2F36; --muted:#8B909B;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:15.5px;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  button,input,textarea,select{font-family:inherit;color:inherit;}
+  button{cursor:pointer;}
+
+  .app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:1000px;margin:0 auto;}
+
+  /* ---- Header ---- */
+  header{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  header h1{font-size:16px;margin:0;font-weight:700;flex:0 0 auto;}
+  .tabs{display:flex;gap:4px;background:var(--surface-2);padding:3px;border-radius:9px;margin-left:6px;}
+  .tab-btn{border:none;background:none;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;color:var(--muted);}
+  .tab-btn.active{background:var(--surface);color:var(--text);}
+  .spacer{flex:1;}
+  .icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .icon-btn:hover{background:var(--surface-2);}
+
+  /* ---- Panels ---- */
+  main{flex:1;min-height:0;position:relative;}
+  .panel{display:none;height:100%;overflow:auto;}
+  .panel.active{display:flex;flex-direction:column;}
+
+  /* ===== Catatan ===== */
+  #panel-notes{flex-direction:row;}
+  .notes-side{width:270px;flex:0 0 auto;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;}
+  .notes-side__top{padding:12px;display:flex;gap:8px;border-bottom:1px solid var(--line);}
+  .notes-side__top input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:var(--bg);}
+  .notes-side__top input:focus{border-color:var(--accent);}
+  .btn-add{background:var(--accent);color:#fff;border:none;border-radius:8px;width:34px;font-size:18px;line-height:1;}
+  .note-list{overflow-y:auto;flex:1;padding:8px;}
+  .note-item{width:100%;text-align:left;border:none;background:none;padding:10px 10px;border-radius:8px;margin-bottom:2px;}
+  .note-item:hover{background:var(--surface-2);}
+  .note-item.active{background:var(--surface-2);border-left:3px solid var(--accent);padding-left:7px;}
+  .note-item__title{font-weight:600;font-size:13.5px;margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .note-item__snip{font-size:11.5px;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .empty-hint{padding:30px 16px;text-align:center;color:var(--muted);font-size:12.5px;}
+
+  .note-edit{flex:1;display:flex;flex-direction:column;padding:20px 26px;min-height:0;}
+  .note-edit__bar{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .note-edit__bar .muted{font-size:11.5px;color:var(--muted);flex:1;}
+  .note-edit input.title{border:none;outline:none;background:none;font-size:21px;font-weight:700;padding:4px 0 10px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+  .note-edit textarea{flex:1;border:none;outline:none;resize:none;background:none;font-size:14.5px;line-height:1.7;min-height:0;}
+  .note-edit__empty{margin:auto;color:var(--muted);text-align:center;font-size:13px;}
+
+  /* ===== Keuangan ===== */
+  #panel-finance{padding:20px 24px;}
+  .fin-summary{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .fin-card{flex:1;min-width:130px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:13px 16px;}
+  .fin-card__label{font-size:11.5px;color:var(--muted);display:block;margin-bottom:4px;}
+  .fin-card__val{font-size:19px;font-weight:700;}
+  .fin-card.income .fin-card__val{color:var(--income);}
+  .fin-card.expense .fin-card__val{color:var(--danger);}
+
+  .fin-form{display:flex;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:16px;}
+  .fin-form input,.fin-form select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--bg);outline:none;}
+  .fin-form input:focus,.fin-form select:focus{border-color:var(--accent);}
+  .fin-form input[name="desc"]{flex:1;min-width:120px;}
+  .fin-form input[name="amount"]{width:120px;}
+  .fin-form button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-size:13px;}
+
+  .tx-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:6px;}
+  .tx-row__dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+  .tx-row__info{flex:1;min-width:0;}
+  .tx-row__desc{font-size:13.5px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tx-row__sub{font-size:11px;color:var(--muted);}
+  .tx-row__amt{font-weight:700;font-size:13.5px;white-space:nowrap;}
+  .tx-row__amt.in{color:var(--income);}
+  .tx-row__amt.out{color:var(--danger);}
+  .tx-row__del{background:none;border:none;color:var(--muted);font-size:15px;padding:2px 4px;}
+  .tx-row__del:hover{color:var(--danger);}
+
+  /* ===== Pengaturan (popover) ===== */
+  .settings-pop{
+    position:absolute;top:52px;right:16px;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:16px;width:250px;box-shadow:0 8px 24px rgba(0,0,0,.12);
+    display:none;z-index:20;
+  }
+  .settings-pop.open{display:block;}
+  .settings-pop h4{margin:0 0 10px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+  .settings-pop h4:not(:first-child){margin-top:16px;}
+  .swatch-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .swatch{width:24px;height:24px;border-radius:50%;border:2px solid transparent;}
+  .swatch.active{border-color:var(--text);}
+  .row{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+  .row input[type="color"]{width:36px;height:24px;border:1px solid var(--line);border-radius:6px;padding:1px;background:none;}
+  .theme-switch{display:flex;background:var(--surface-2);border-radius:8px;padding:2px;gap:2px;}
+  .theme-switch button{flex:1;border:none;background:none;padding:6px 0;border-radius:6px;font-size:12px;color:var(--muted);}
+  .theme-switch button.active{background:var(--surface);color:var(--text);}
+  .data-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+  .data-row button{font-size:11.5px;padding:6px 9px;border-radius:7px;border:1px solid var(--line);background:var(--bg);}
+  .data-row button:hover{background:var(--surface-2);}
+
+  /* ---- Responsif ---- */
+  @media (max-width:700px){
+    #panel-notes{flex-direction:column;}
+    .notes-side{width:100%;border-right:none;border-bottom:1px solid var(--line);max-height:38vh;}
+    .note-edit{padding:16px;}
+    header h1{display:none;}
+    .settings-pop{right:10px;left:10px;width:auto;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>📔 Catatanku</h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="notes">Catatan</button>
+      <button class="tab-btn" data-tab="finance">Keuangan</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnSettings" title="Pengaturan tampilan">⚙</button>
+  </header>
+
+  <main>
+    <!-- ===== CATATAN ===== -->
+    <section class="panel active" id="panel-notes">
+      <div class="notes-side">
+        <div class="notes-side__top">
+          <input type="search" id="searchInput" placeholder="Cari catatan…" />
+          <button class="btn-add" id="btnNewNote" title="Catatan baru">+</button>
+        </div>
+        <div class="note-list" id="noteList"></div>
+      </div>
+      <div class="note-edit" id="noteEdit">
+        <div class="note-edit__empty" id="noteEmpty">Pilih catatan, atau tekan “+” untuk membuat yang baru.</div>
+        <div id="noteForm" style="display:none;flex:1;flex-direction:column;min-height:0;">
+          <div class="note-edit__bar">
+            <span class="muted" id="noteMeta"></span>
+            <button class="icon-btn" id="btnDeleteNote" title="Hapus">🗑</button>
+          </div>
+          <input class="title" id="noteTitle" placeholder="Judul catatan" />
+          <textarea id="noteContent" placeholder="Tulis materi kuliah, ide, atau apa pun di sini…"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== KEUANGAN ===== -->
+    <section class="panel" id="panel-finance">
+      <div class="fin-summary">
+        <div class="fin-card"><span class="fin-card__label">Saldo</span><span class="fin-card__val" id="statBalance">Rp 0</span></div>
+        <div class="fin-card income"><span class="fin-card__label">Pemasukan</span><span class="fin-card__val" id="statIncome">Rp 0</span></div>
+        <div class="fin-card expense"><span class="fin-card__label">Pengeluaran</span><span class="fin-card__val" id="statExpense">Rp 0</span></div>
+      </div>
+
+      <form class="fin-form" id="txForm">
+        <select name="type">
+          <option value="expense">Keluar</option>
+          <option value="income">Masuk</option>
+        </select>
+        <input name="desc" placeholder="Catatan (mis. Makan siang)" />
+        <input name="amount" type="number" min="0" placeholder="Jumlah (Rp)" required />
+        <select name="category">
+          <option>Makanan</option><option>Transportasi</option><option>Kuliah</option>
+          <option>Belanja</option><option>Hiburan</option><option>Lainnya</option>
+        </select>
+        <button type="submit">Tambah</button>
+      </form>
+
+      <div id="txList"></div>
+    </section>
+  </main>
+
+  <!-- ===== POPOVER PENGATURAN ===== -->
+  <div class="settings-pop" id="settingsPop">
+    <h4>Warna aksen</h4>
+    <div class="swatch-row" id="accentSwatches"></div>
+    <div class="row"><span>Kustom</span><input type="color" id="accentCustom" /></div>
+
+    <h4>Warna teks</h4>
+    <div class="row"><span>Kustom</span><input type="color" id="textCustom" /></div>
+
+    <h4>Tema</h4>
+    <div class="theme-switch">
+      <button data-theme="light" class="active">☀ Terang</button>
+      <button data-theme="dark">☾ Gelap</button>
+    </div>
+
+    <h4>Data</h4>
+    <div class="data-row">
+      <button id="btnExport">Ekspor</button>
+      <label for="importFile" style="font-size:11.5px;padding:6px 9px;border-radius:7px;border:1px solid var(--line);background:var(--bg);">Impor</label>
+      <input type="file" id="importFile" accept="application/json" hidden />
+      <button id="btnReset">Hapus semua</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "catatanku_simple_v1";
+
+  var ACCENTS = ["#3454D1","#2F8F5B","#A5354B","#B8862B","#1F8A8C","#C2568B"];
+  var CAT_COLORS = {Makanan:"#3454D1",Transportasi:"#2F8F5B",Kuliah:"#A5354B",Belanja:"#B8862B",Hiburan:"#1F8A8C",Lainnya:"#C2568B"};
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+  function defaultData(){
+    return {
+      notes: [
+        { id: uid(), title: "Selamat datang 👋", content: "Ini contoh catatan.\n\nKetik di sini untuk mencatat materi kuliah, ide, atau apa saja. Semua tersimpan otomatis di perangkat ini — tidak butuh internet.", updatedAt: Date.now() }
+      ],
+      expenses: [],
+      settings: { accent: "#3454D1", text: "#23262B", theme: "light" }
+    };
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(!raw) return defaultData();
+      var d = JSON.parse(raw);
+      var def = defaultData();
+      return {
+        notes: Array.isArray(d.notes) ? d.notes : def.notes,
+        expenses: Array.isArray(d.expenses) ? d.expenses : def.expenses,
+        settings: Object.assign(def.settings, d.settings || {})
+      };
+    }catch(e){
+      console.error("Gagal memuat data, memakai data awal.", e);
+      return defaultData();
+    }
+  }
+
+  var DATA = load();
+  var state = { tab: "notes", currentNoteId: DATA.notes[0] ? DATA.notes[0].id : null, search: "" };
+
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(DATA)); }
+    catch(e){ console.error("Gagal menyimpan", e); }
+  }
+
+  function fmtRp(n){
+    var sign = n < 0 ? "-" : "";
+    return sign + "Rp " + Math.abs(Math.round(n)).toLocaleString("id-ID");
+  }
+  function fmtDate(ts){
+    return new Date(ts).toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"});
+  }
+  function esc(s){
+    return (s||"").replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function debounce(fn, ms){
+    var t;
+    return function(){
+      var args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function(){ fn.apply(null, args); }, ms);
+    };
+  }
+
+  /* ---------- Tabs ---------- */
+  document.querySelectorAll(".tab-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.toggle("active", b === btn); });
+      document.getElementById("panel-notes").classList.toggle("active", state.tab === "notes");
+      document.getElementById("panel-finance").classList.toggle("active", state.tab === "finance");
+      if(state.tab === "finance") renderFinance();
+    });
+  });
+
+  /* ---------- Catatan ---------- */
+  function visibleNotes(){
+    var list = DATA.notes.slice();
+    if(state.search.trim()){
+      var q = state.search.trim().toLowerCase();
+      list = list.filter(function(n){
+        return n.title.toLowerCase().indexOf(q) > -1 || n.content.toLowerCase().indexOf(q) > -1;
+      });
+    }
+    return list.sort(function(a,b){ return b.updatedAt - a.updatedAt; });
+  }
+
+  function renderNoteList(){
+    var wrap = document.getElementById("noteList");
+    var list = visibleNotes();
+    wrap.innerHTML = "";
+    if(!list.length){
+      wrap.innerHTML = '<div class="empty-hint">Belum ada catatan.</div>';
+      return;
+    }
+    list.forEach(function(n){
+      var item = document.createElement("button");
+      item.className = "note-item" + (n.id === state.currentNoteId ? " active" : "");
+      item.innerHTML =
+        '<p class="note-item__title">' + esc(n.title || "Tanpa judul") + '</p>' +
+        '<p class="note-item__snip">' + esc(n.content).slice(0,60) + '</p>';
+      item.addEventListener("click", function(){
+        state.currentNoteId = n.id;
+        renderNoteList();
+        renderNoteEditor();
+      });
+      wrap.appendChild(item);
+    });
+  }
+
+  function renderNoteEditor(){
+    var note = DATA.notes.find(function(n){ return n.id === state.currentNoteId; });
+    var empty = document.getElementById("noteEmpty");
+    var form = document.getElementById("noteForm");
+    if(!note){ empty.style.display = "block"; form.style.display = "none"; return; }
+    empty.style.display = "none"; form.style.display = "flex";
+    document.getElementById("noteTitle").value = note.title;
+    document.getElementById("noteContent").value = note.content;
+    document.getElementById("noteMeta").textContent = "Diperbarui " + fmtDate(note.updatedAt);
+  }
+
+  var autosaveNote = debounce(function(){
+    var note = DATA.notes.find(function(n){ return n.id === state.currentNoteId; });
+    if(!note) return;
+    note.title = document.getElementById("noteTitle").value || "Tanpa judul";
+    note.content = document.getElementById("noteContent").value;
+    note.updatedAt = Date.now();
+    save();
+    document.getElementById("noteMeta").textContent = "Tersimpan · " + fmtDate(note.updatedAt);
+    renderNoteList();
+  }, 400);
+
+  document.getElementById("noteTitle").addEventListener("input", autosaveNote);
+  document.getElementById("noteContent").addEventListener("input", autosaveNote);
+
+  document.getElementById("btnNewNote").addEventListener("click", function(){
+    var note = { id: uid(), title: "Catatan baru", content: "", updatedAt: Date.now() };
+    DATA.notes.unshift(note);
+    state.currentNoteId = note.id;
+    save(); renderNoteList(); renderNoteEditor();
+    document.getElementById("noteTitle").focus();
+    document.getElementById("noteTitle").select();
+  });
+
+  document.getElementById("btnDeleteNote").addEventListener("click", function(){
+    var note = DATA.notes.find(function(n){ return n.id === state.currentNoteId; });
+    if(!note) return;
+    if(!confirm('Hapus catatan "' + note.title + '"?')) return;
+    DATA.notes = DATA.notes.filter(function(n){ return n.id !== note.id; });
+    state.currentNoteId = null;
+    save(); renderNoteList(); renderNoteEditor();
+  });
+
+  document.getElementById("searchInput").addEventListener("input", function(e){
+    state.search = e.target.value;
+    renderNoteList();
+  });
+
+  /* ---------- Keuangan ---------- */
+  function renderFinance(){
+    var list = DATA.expenses.slice().sort(function(a,b){ return b.createdAt - a.createdAt; });
+    var income = 0, expense = 0;
+    list.forEach(function(e){ if(e.type === "income") income += e.amount; else expense += e.amount; });
+    document.getElementById("statIncome").textContent = fmtRp(income);
+    document.getElementById("statExpense").textContent = fmtRp(expense);
+    document.getElementById("statBalance").textContent = fmtRp(income - expense);
+
+    var wrap = document.getElementById("txList");
+    wrap.innerHTML = "";
+    if(!list.length){
+      wrap.innerHTML = '<div class="empty-hint">Belum ada transaksi. Tambahkan lewat form di atas.</div>';
+      return;
+    }
+    list.forEach(function(e){
+      var row = document.createElement("div");
+      row.className = "tx-row";
+      var color = CAT_COLORS[e.category] || "#8B8578";
+      row.innerHTML =
+        '<span class="tx-row__dot" style="background:' + color + '"></span>' +
+        '<div class="tx-row__info">' +
+          '<p class="tx-row__desc">' + esc(e.description || e.category) + '</p>' +
+          '<span class="tx-row__sub">' + esc(e.category) + ' · ' + fmtDate(e.createdAt) + '</span>' +
+        '</div>' +
+        '<span class="tx-row__amt ' + (e.type === "income" ? "in" : "out") + '">' +
+          (e.type === "income" ? "+ " : "- ") + fmtRp(e.amount) +
+        '</span>' +
+        '<button class="tx-row__del" title="Hapus">✕</button>';
+      row.querySelector(".tx-row__del").addEventListener("click", function(){
+        DATA.expenses = DATA.expenses.filter(function(x){ return x.id !== e.id; });
+        save(); renderFinance();
+      });
+      wrap.appendChild(row);
+    });
+  }
+
+  document.getElementById("txForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var f = e.target;
+    var amount = parseFloat(f.amount.value);
+    if(!amount || amount <= 0){ alert("Isi jumlah yang valid."); return; }
+    DATA.expenses.push({
+      id: uid(),
+      type: f.type.value,
+      description: f.desc.value.trim(),
+      category: f.category.value,
+      amount: amount,
+      createdAt: Date.now()
+    });
+    save();
+    f.reset();
+    renderFinance();
+  });
+
+  /* ---------- Pengaturan ---------- */
+  function applySettings(){
+    var s = DATA.settings;
+    document.documentElement.style.setProperty("--accent", s.accent);
+    document.documentElement.style.setProperty("--text", s.text);
+    document.documentElement.setAttribute("data-theme", s.theme);
+  }
+
+  function renderSettingsPop(){
+    var s = DATA.settings;
+    var swatchWrap = document.getElementById("accentSwatches");
+    swatchWrap.innerHTML = "";
+    ACCENTS.forEach(function(hex){
+      var sw = document.createElement("button");
+      sw.className = "swatch" + (hex.toLowerCase() === s.accent.toLowerCase() ? " active" : "");
+      sw.style.background = hex;
+      sw.addEventListener("click", function(){
+        s.accent = hex; save(); applySettings(); renderSettingsPop();
+      });
+      swatchWrap.appendChild(sw);
+    });
+    document.getElementById("accentCustom").value = s.accent;
+    document.getElementById("textCustom").value = s.text;
+    document.querySelectorAll(".theme-switch button").forEach(function(b){
+      b.classList.toggle("active", b.dataset.theme === s.theme);
+    });
+  }
+
+  document.getElementById("btnSettings").addEventListener("click", function(){
+    document.getElementById("settingsPop").classList.toggle("open");
+    renderSettingsPop();
+  });
+  document.addEventListener("click", function(e){
+    var pop = document.getElementById("settingsPop");
+    if(pop.classList.contains("open") && !pop.contains(e.target) && e.target.id !== "btnSettings"){
+      pop.classList.remove("open");
+    }
+  });
+
+  document.getElementById("accentCustom").addEventListener("input", function(e){
+    DATA.settings.accent = e.target.value; save(); applySettings(); renderSettingsPop();
+  });
+  document.getElementById("textCustom").addEventListener("input", function(e){
+    DATA.settings.text = e.target.value; save(); applySettings();
+  });
+  document.querySelectorAll(".theme-switch button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      DATA.settings.theme = btn.dataset.theme; save(); applySettings(); renderSettingsPop();
+    });
+  });
+
+  document.getElementById("btnExport").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(DATA, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "catatanku-cadangan.json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var parsed = JSON.parse(reader.result);
+        var def = defaultData();
+        DATA = {
+          notes: Array.isArray(parsed.notes) ? parsed.notes : def.notes,
+          expenses: Array.isArray(parsed.expenses) ? parsed.expenses : def.expenses,
+          settings: Object.assign(def.settings, parsed.settings || {})
+        };
+        save();
+        state.currentNoteId = DATA.notes[0] ? DATA.notes[0].id : null;
+        applySettings(); renderNoteList(); renderNoteEditor(); renderFinance(); renderSettingsPop();
+        alert("Data berhasil diimpor.");
+      }catch(err){
+        alert("Gagal mengimpor: file tidak valid.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("btnReset").addEventListener("click", function(){
+    if(!confirm("Semua catatan dan transaksi akan dihapus permanen. Lanjutkan?")) return;
+    DATA = defaultData();
+    save();
+    state.currentNoteId = DATA.notes[0] ? DATA.notes[0].id : null;
+    applySettings(); renderNoteList(); renderNoteEditor(); renderFinance(); renderSettingsPop();
+  });
+
+  /* ---------- Init ---------- */
+  applySettings();
+  renderNoteList();
+  renderNoteEditor();
+  renderFinance();
+})();
+</script>
+</body>
+</html>
